@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Helper Tools</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Calculator, Clock, Plus, Copy, Check, Globe, DollarSign, Calendar, Users } = lucide;
+
+        // Icon component wrapper
+        const Icon = ({ icon: IconComponent, size = 20, className = "" }) => {
+            const ref = React.useRef(null);
+            
+            React.useEffect(() => {
+                if (ref.current && IconComponent) {
+                    ref.current.innerHTML = '';
+                    const icon = IconComponent.createElement();
+                    icon.setAttribute('width', size);
+                    icon.setAttribute('height', size);
+                    ref.current.appendChild(icon);
+                }
+            }, [IconComponent, size]);
+            
+            return <span ref={ref} className={className}></span>;
+        };
+
+        const QuickHelpersDashboard = () => {
+            const [activeTab, setActiveTab] = useState('super');
+            const [gstAmount, setGstAmount] = useState('');
+            const [gstRate, setGstRate] = useState('10');
+            const [selectedTimezones, setSelectedTimezones] = useState([
+                { name: 'Sydney', timezone: 'Australia/Sydney', time: '' },
+                { name: 'New York', timezone: 'America/New_York', time: '' },
+                { name: 'London', timezone: 'Europe/London', time: '' }
+            ]);
+            const [meetingTime, setMeetingTime] = useState('');
+            const [copySuccess, setCopySuccess] = useState('');
+            const [modelRate, setModelRate] = useState('');
+            const [superRate, setSuperRate] = useState('11.5');
+            const [asfRate, setAsfRate] = useState('20');
+
+            // Common timezones for quick selection
+            const commonTimezones = [
+                { name: 'Sydney', timezone: 'Australia/Sydney' },
+                { name: 'Melbourne', timezone: 'Australia/Melbourne' },
+                { name: 'Brisbane', timezone: 'Australia/Brisbane' },
+                { name: 'Perth', timezone: 'Australia/Perth' },
+                { name: 'Auckland', timezone: 'Pacific/Auckland' },
+                { name: 'Tokyo', timezone: 'Asia/Tokyo' },
+                { name: 'Singapore', timezone: 'Asia/Singapore' },
+                { name: 'Hong Kong', timezone: 'Asia/Hong_Kong' },
+                { name: 'London', timezone: 'Europe/London' },
+                { name: 'Paris', timezone: 'Europe/Paris' },
+                { name: 'New York', timezone: 'America/New_York' },
+                { name: 'Los Angeles', timezone: 'America/Los_Angeles' },
+                { name: 'Chicago', timezone: 'America/Chicago' },
+                { name: 'Vancouver', timezone: 'America/Vancouver' }
+            ];
+
+            // Calculate Superannuation and ASF
+            const calculateSuper = () => {
+                const rate = parseFloat(modelRate);
+                const superPercent = parseFloat(superRate);
+                const asfPercent = parseFloat(asfRate);
+                
+                if (isNaN(rate) || isNaN(superPercent) || isNaN(asfPercent)) {
+                    return { modelRate: 0, super: 0, subtotal: 0, asf: 0, total: 0 };
+                }
+
+                const superAmount = (rate * superPercent) / 100;
+                const subtotal = rate + superAmount;
+                const asfAmount = (subtotal * asfPercent) / 100;
+                const total = subtotal + asfAmount;
+
+                return {
+                    modelRate: rate.toFixed(2),
+                    super: superAmount.toFixed(2),
+                    subtotal: subtotal.toFixed(2),
+                    asf: asfAmount.toFixed(2),
+                    total: total.toFixed(2)
+                };
+            };
+
+            const calculateGST = () => {
+                const amount = parseFloat(gstAmount);
+                const rate = parseFloat(gstRate);
+                if (isNaN(amount) || isNaN(rate)) return { gst: 0, total: 0, base: 0 };
+
+                const gst = (amount * rate) / 100;
+                const total = amount + gst;
+                const baseAmount = amount / (1 + rate / 100);
+
+                return {
+                    gst: gst.toFixed(2),
+                    total: total.toFixed(2),
+                    base: baseAmount.toFixed(2),
+                    isIncInc: amount > 0
+                };
+            };
+
+            // Update timezone times
+            const updateTimes = () => {
+                const now = new Date();
+                const updatedTimezones = selectedTimezones.map(tz => ({
+                    ...tz,
+                    time: now.toLocaleString('en-AU', {
+                        timeZone: tz.timezone,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short'
+                    })
+                }));
+                setSelectedTimezones(updatedTimezones);
+            };
+
+            // Convert meeting time across timezones
+            const convertMeetingTime = () => {
+                if (!meetingTime) return [];
+                
+                const meetingDate = new Date(meetingTime);
+                
+                return selectedTimezones.map(tz => ({
+                    ...tz,
+                    convertedTime: meetingDate.toLocaleString('en-AU', {
+                        timeZone: tz.timezone,
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                }));
+            };
+
+            // Copy to clipboard
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+                setCopySuccess('Copied!');
+                setTimeout(() => setCopySuccess(''), 2000);
+            };
+
+            // Add timezone
+            const addTimezone = (timezone) => {
+                if (selectedTimezones.find(tz => tz.timezone === timezone.timezone)) return;
+                setSelectedTimezones([...selectedTimezones, { ...timezone, time: '' }]);
+            };
+
+            // Remove timezone
+            const removeTimezone = (index) => {
+                setSelectedTimezones(selectedTimezones.filter((_, i) => i !== index));
+            };
+
+            useEffect(() => {
+                updateTimes();
+                const interval = setInterval(updateTimes, 60000);
+                return () => clearInterval(interval);
+            }, [selectedTimezones.length]);
+
+            const gstResults = calculateGST();
+            const superResults = calculateSuper();
+            const convertedTimes = convertMeetingTime();
+
+            return (
+                <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Quick Reference Helper Tools</h1>
+                    
+                    {/* Tab Navigation */}
+                    <div className="flex flex-wrap gap-2 mb-6 bg-white p-2 rounded-lg shadow-sm">
+                        <button
+                            onClick={() => setActiveTab('super')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'super' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Icon icon={Users} size={16} />
+                            Super + ASF Calculator
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('gst')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'gst' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Icon icon={DollarSign} size={16} />
+                            GST Calculator
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('timezone')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'timezone' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Icon icon={Globe} size={16} />
+                            Timezone Converter
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('meeting')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                                activeTab === 'meeting' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Icon icon={Calendar} size={16} />
+                            Meeting Scheduler
+                        </button>
+                    </div>
+
+                    {/* Superannuation + ASF Calculator */}
+                    {activeTab === 'super' && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <Icon icon={Users} size={20} />
+                                Superannuation + Agency Service Fee Calculator
+                            </h2>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Model Rate ($)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={modelRate}
+                                            onChange={(e) => setModelRate(e.target.value)}
+                                            placeholder="Enter model rate"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Superannuation Rate (%)
+                                        </label>
+                                        <select
+                                            value={superRate}
+                                            onChange={(e) => setSuperRate(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="11.5">11.5% (Current AU Rate)</option>
+                                            <option value="12">12% (July 2025)</option>
+                                            <option value="10">10%</option>
+                                            <option value="9.5">9.5%</option>
+                                            <option value="0">0% (No Super)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Agency Service Fee (%)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={asfRate}
+                                            onChange={(e) => setAsfRate(e.target.value)}
+                                            placeholder="Usually 20%"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h3 className="font-medium text-gray-800 mb-3">Calculation Breakdown</h3>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded border-l-4 border-blue-400">
+                                            <div className="flex justify-between text-sm text-gray-600 mb-1">
+                                                <span>Step 1: Model Rate</span>
+                                            </div>
+                                            <div className="flex justify-between font-medium">
+                                                <span>Base Rate:</span>
+                                                <span className="font-mono">${superResults.modelRate}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-white p-3 rounded border-l-4 border-green-400">
+                                            <div className="flex justify-between text-sm text-gray-600 mb-1">
+                                                <span>Step 2: Add Superannuation ({superRate}%)</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Super Amount:</span>
+                                                <span className="font-mono">+${superResults.super}</span>
+                                            </div>
+                                            <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                                                <span>Subtotal:</span>
+                                                <span className="font-mono">${superResults.subtotal}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-white p-3 rounded border-l-4 border-purple-400">
+                                            <div className="flex justify-between text-sm text-gray-600 mb-1">
+                                                <span>Step 3: Add ASF ({asfRate}% on subtotal)</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>ASF Amount:</span>
+                                                <span className="font-mono">+${superResults.asf}</span>
+                                            </div>
+                                            <div className="flex justify-between font-semibold text-lg border-t pt-2 mt-2 bg-yellow-50 -mx-3 px-3 rounded">
+                                                <span>TOTAL COST:</span>
+                                                <span className="font-mono text-green-700">${superResults.total}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => copyToClipboard(`Model Rate: ${superResults.modelRate}, Super: ${superResults.super}, ASF: ${superResults.asf}, Total: ${superResults.total}`)}
+                                        className="mt-4 w-full bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Icon icon={copySuccess ? Check : Copy} size={16} />
+                                        {copySuccess || 'Copy Breakdown'}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                                <h4 className="font-medium text-gray-800 mb-2">📋 Calculation Flow</h4>
+                                <div className="text-sm text-gray-700 space-y-1">
+                                    <p><strong>1.</strong> Start with Model Rate (base contractor rate)</p>
+                                    <p><strong>2.</strong> Add Superannuation (calculated on model rate only)</p>
+                                    <p><strong>3.</strong> Add Agency Service Fee (calculated on model rate + super)</p>
+                                    <p className="text-blue-700 font-medium mt-2">Formula: Model Rate + (Model Rate × Super%) + ((Model Rate + Super) × ASF%)</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* GST Calculator */}
+                    {activeTab === 'gst' && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <Icon icon={Calculator} size={20} />
+                                GST Calculator
+                            </h2>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Amount ($)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={gstAmount}
+                                            onChange={(e) => setGstAmount(e.target.value)}
+                                            placeholder="Enter amount"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            GST Rate (%)
+                                        </label>
+                                        <select
+                                            value={gstRate}
+                                            onChange={(e) => setGstRate(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="10">10% (Australia)</option>
+                                            <option value="15">15% (New Zealand)</option>
+                                            <option value="20">20% (UK VAT)</option>
+                                            <option value="5">5% (Canada GST)</option>
+                                            <option value="0">0% (GST-free)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h3 className="font-medium text-gray-800 mb-3">Results</h3>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                            <span>Base Amount:</span>
+                                            <span className="font-mono">${gstResults.base}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>GST ({gstRate}%):</span>
+                                            <span className="font-mono">${gstResults.gst}</span>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-2 font-semibold">
+                                            <span>Total (Inc GST):</span>
+                                            <span className="font-mono">${gstResults.total}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => copyToClipboard(`Base: ${gstResults.base}, GST: ${gstResults.gst}, Total: ${gstResults.total}`)}
+                                        className="mt-4 w-full bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Icon icon={copySuccess ? Check : Copy} size={16} />
+                                        {copySuccess || 'Copy Results'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Timezone Converter */}
+                    {activeTab === 'timezone' && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <Icon icon={Clock} size={20} />
+                                Current Time Across Zones
+                            </h2>
+                            
+                            <div className="grid gap-4">
+                                {selectedTimezones.map((tz, index) => (
+                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <span className="font-medium text-gray-800">{tz.name}</span>
+                                            <span className="text-sm text-gray-600 ml-2">({tz.timezone})</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-mono text-lg">{tz.time}</span>
+                                            <button
+                                                onClick={() => removeTimezone(index)}
+                                                className="text-red-500 hover:text-red-700 text-sm"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mt-6">
+                                <h3 className="font-medium text-gray-800 mb-3">Add Timezone</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    {commonTimezones
+                                        .filter(tz => !selectedTimezones.find(selected => selected.timezone === tz.timezone))
+                                        .map((tz, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => addTimezone(tz)}
+                                            className="text-left px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm transition-colors"
+                                        >
+                                            {tz.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Meeting Scheduler */}
+                    {activeTab === 'meeting' && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <Icon icon={Calendar} size={20} />
+                                Meeting Time Converter
+                            </h2>
+                            
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Meeting Time
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={meetingTime}
+                                    onChange={(e) => setMeetingTime(e.target.value)}
+                                    className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                            
+                            {meetingTime && (
+                                <div>
+                                    <h3 className="font-medium text-gray-800 mb-3">Meeting Time in Each Zone</h3>
+                                    <div className="grid gap-3">
+                                        {convertedTimes.map((tz, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                                <span className="font-medium text-gray-800">{tz.name}</span>
+                                                <span className="font-mono text-lg text-blue-700">{tz.convertedTime}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => {
+                                            const summary = convertedTimes.map(tz => `${tz.name}: ${tz.convertedTime}`).join('\n');
+                                            copyToClipboard(summary);
+                                        }}
+                                        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2"
+                                    >
+                                        <Icon icon={copySuccess ? Check : Copy} size={16} />
+                                        {copySuccess || 'Copy All Times'}
+                                    </button>
+                                </div>
+                            )}
+                            
+                            <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+                                <h4 className="font-medium text-gray-800 mb-2">💡 Pro Tips for Global Meetings</h4>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                    <li>• Rotate meeting times to be fair to different time zones</li>
+                                    <li>• Consider "core hours" overlap between zones (typically 8am-5pm)</li>
+                                    <li>• Use "early morning" and "late evening" slots sparingly</li>
+                                    <li>• Check for public holidays in different regions</li>
+                                    <li>• Send calendar invites that auto-adjust to recipients' time zones</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer with expandability note */}
+                    <div className="mt-8 text-center text-gray-600">
+                        <p className="text-sm">More helper tools can be easily added to this dashboard</p>
+                        <p className="text-xs mt-1">Currency converter • Unit converter • Date calculator • and more...</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<QuickHelpersDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
