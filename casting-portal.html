@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casting Portal - Éminente Creative Production</title>
+    <link rel="stylesheet" href="eminente-design-system.css">
+    <style>
+        /* Page Specific Styles */
+        .hero-section {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 120px;
+            line-height: 0.9;
+            letter-spacing: -2px;
+            color: var(--eminente-accent);
+            margin-bottom: var(--space-lg);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 60px;
+            }
+        }
+        
+        .hero-subtitle {
+            font-family: var(--font-sans);
+            font-size: var(--text-small);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--eminente-text);
+        }
+        
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            padding: var(--space-xxl) 0;
+        }
+        
+        .portal-card {
+            background: var(--eminente-white);
+            border: var(--border);
+            padding: var(--space-xl);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .portal-card-number {
+            font-family: var(--font-serif);
+            font-size: var(--text-display);
+            color: var(--eminente-accent);
+            line-height: 1;
+            margin-bottom: var(--space-md);
+        }
+        
+        .portal-card-title {
+            font-family: var(--font-serif);
+            font-size: var(--text-xlarge);
+            color: var(--eminente-text);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .portal-card-description {
+            font-family: var(--font-sans);
+            font-size: var(--text-small);
+            color: var(--eminente-gray);
+            line-height: var(--leading-relaxed);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: var(--text-caption);
+            font-weight: var(--font-bold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid;
+            margin-top: var(--space-md);
+        }
+        
+        .status-open {
+            color: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .status-closed {
+            color: var(--eminente-gray);
+            border-color: var(--eminente-gray);
+        }
+        
+        .announcement-bar {
+            background: var(--eminente-text);
+            color: var(--eminente-bg);
+            padding: var(--space-sm) var(--space-lg);
+            text-align: center;
+            font-size: var(--text-small);
+        }
+        
+        /* Grid Background Pattern */
+        .grid-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .grid-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            background: var(--eminente-text);
+        }
+        
+        .grid-pattern::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--eminente-text);
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid Pattern Background -->
+    <div class="grid-pattern"></div>
+    
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        New casting call: Portmans Campaign - Applications close 15 August
+    </div>
+    
+    <!-- Header -->
+    <header class="eminente-header">
+        <div class="eminente-logo">Éminente Creative Production</div>
+        <nav class="eminente-nav">
+            <a href="/">Home</a>
+            <a href="/casting-portal.html">Casting</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+        </nav>
+        <div class="eminente-dot"></div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Casting</h1>
+            <p class="hero-subtitle">Submit Your Application</p>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="eminente-container">
+        <!-- Active Casting Calls -->
+        <section class="portal-section">
+            <h2 class="eminente-display">Active Calls</h2>
+            
+            <div class="portal-grid">
+                <!-- Casting Call 1 -->
+                <a href="/castingform.html?project=portmans" class="portal-card">
+                    <div class="portal-card-number">01</div>
+                    <h3 class="portal-card-title">Portmans Campaign</h3>
+                    <p class="portal-card-description">
+                        Seeking female models aged 18-25 for Spring/Summer campaign.
+                        Studio shoot in Sydney, 2-day booking.
+                    </p>
+                    <span class="status-badge status-open">Open</span>
+                </a>
+                
+                <!-- Casting Call 2 -->
+                <a href="/castingform.html?project=poshpeanut" class="portal-card">
+                    <div class="portal-card-number">02</div>
+                    <h3 class="portal-card-title">Posh Peanut Kids</h3>
+                    <p class="portal-card-description">
+                        Children aged 3-8 for lifestyle e-commerce shoot.
+                        Must have valid working papers.
+                    </p>
+                    <span class="status-badge status-open">Open</span>
+                </a>
+                
+                <!-- Casting Call 3 -->
+                <a href="/castingform.html?project=editorial" class="portal-card">
+                    <div class="portal-card-number">03</div>
+                    <h3 class="portal-card-title">Editorial Beauty</h3>
+                    <p class="portal-card-description">
+                        High-end beauty editorial for international publication.
+                        All ethnicities welcome.
+                    </p>
+                    <span class="status-badge status-closed">Closed</span>
+                </a>
+            </div>
+        </section>
+        
+        <!-- General Submissions -->
+        <section class="portal-section" style="margin-top: var(--space-xxl);">
+            <h2 class="eminente-display">General Submissions</h2>
+            
+            <div class="portal-grid">
+                <!-- Model Submission -->
+                <a href="/castingform.html?type=model" class="portal-card">
+                    <div class="portal-card-number">→</div>
+                    <h3 class="portal-card-title">Model Application</h3>
+                    <p class="portal-card-description">
+                        Submit your portfolio for consideration for upcoming projects.
+                        All ages and sizes welcome.
+                    </p>
+                </a>
+                
+                <!-- Talent Submission -->
+                <a href="/castingform.html?type=talent" class="portal-card">
+                    <div class="portal-card-number">→</div>
+                    <h3 class="portal-card-title">Talent Registration</h3>
+                    <p class="portal-card-description">
+                        Register as talent for commercial and lifestyle shoots.
+                        Acting experience preferred.
+                    </p>
+                </a>
+                
+                <!-- Child Model -->
+                <a href="/castingform.html?type=child" class="portal-card">
+                    <div class="portal-card-number">→</div>
+                    <h3 class="portal-card-title">Child Model</h3>
+                    <p class="portal-card-description">
+                        Register child models aged 0-16.
+                        Parent/guardian consent required.
+                    </p>
+                </a>
+            </div>
+        </section>
+        
+        <!-- Information Section -->
+        <section class="portal-section" style="margin-top: var(--space-xxl); padding-bottom: var(--space-xxl);">
+            <h2 class="eminente-display">Information</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xxl); margin-top: var(--space-xl);">
+                <div>
+                    <h3 class="eminente-h3">Submission Guidelines</h3>
+                    <ul style="list-style: none; padding: 0; margin-top: var(--space-md);">
+                        <li style="margin-bottom: var(--space-sm); padding-left: var(--space-md); position: relative;">
+                            <span style="position: absolute; left: 0;">•</span>
+                            Professional photos preferred but not required
+                        </li>
+                        <li style="margin-bottom: var(--space-sm); padding-left: var(--space-md); position: relative;">
+                            <span style="position: absolute; left: 0;">•</span>
+                            Include current measurements and sizing
+                        </li>
+                        <li style="margin-bottom: var(--space-sm); padding-left: var(--space-md); position: relative;">
+                            <span style="position: absolute; left: 0;">•</span>
+                            List any relevant experience
+                        </li>
+                        <li style="margin-bottom: var(--space-sm); padding-left: var(--space-md); position: relative;">
+                            <span style="position: absolute; left: 0;">•</span>
+                            Provide accurate contact information
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="eminente-h3">Contact Casting</h3>
+                    <div style="margin-top: var(--space-md);">
+                        <p class="eminente-body">
+                            Éminente Creative Production<br>
+                            Casting Department<br>
+                            <br>
+                            casting@eminente.art<br>
+                            +61 282 182 143
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="eminente-footer">
+        <div>© 2025 Éminente Pty Ltd. ABN 84663448992</div>
+        <div>All rights reserved</div>
+    </footer>
+    
+    <script>
+        // Add subtle animations on scroll
+        const cards = document.querySelectorAll('.portal-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 100);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

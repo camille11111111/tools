@@ -335,6 +335,24 @@
     </div>
 
     <script>
+        // GOOGLE FORMS INTEGRATION
+        // To connect this to Google Forms:
+        // 1. Create a Google Form with matching field names
+        // 2. Get the form URL and field IDs from "Get pre-filled link"
+        // 3. Replace the URL and field mappings below
+        
+        // Example Google Form URL (replace with your actual form URL)
+        const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+        
+        // Field mappings (replace with your actual field entry IDs)
+        const fieldMappings = {
+            firstName: 'entry.123456789',  // Replace with actual entry ID
+            lastName: 'entry.987654321',   // Replace with actual entry ID
+            email: 'entry.111111111',      // Replace with actual entry ID
+            phone: 'entry.222222222',      // Replace with actual entry ID
+            // Add all your field mappings here
+        };
+        
         // Handle form submission
         document.getElementById('castingForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -357,11 +375,12 @@
                 }
             }
             
-            // Here you would normally send the data to a server
-            // For now, we'll just log it and show success message
-            console.log('Form submission:', data);
+            // Option 1: Submit to Google Forms (uncomment when you have the actual form URL)
+            /*
+            submitToGoogleForms(data);
+            */
             
-            // You could also save to localStorage for later retrieval
+            // Option 2: Save to localStorage (current implementation)
             const submissions = JSON.parse(localStorage.getItem('castingSubmissions') || '[]');
             submissions.push({
                 ...data,
@@ -376,6 +395,35 @@
             // Scroll to top
             window.scrollTo(0, 0);
         });
+        
+        // Function to submit data to Google Forms
+        function submitToGoogleForms(data) {
+            // Create a form data object for Google Forms
+            const googleFormData = new FormData();
+            
+            // Map your form fields to Google Form entry IDs
+            Object.keys(data).forEach(key => {
+                if (fieldMappings[key]) {
+                    if (Array.isArray(data[key])) {
+                        // For checkboxes, join values
+                        googleFormData.append(fieldMappings[key], data[key].join(', '));
+                    } else {
+                        googleFormData.append(fieldMappings[key], data[key]);
+                    }
+                }
+            });
+            
+            // Submit to Google Forms using fetch
+            fetch(GOOGLE_FORM_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Required for Google Forms
+                body: googleFormData
+            }).then(() => {
+                console.log('Submitted to Google Forms');
+            }).catch(error => {
+                console.error('Error submitting to Google Forms:', error);
+            });
+        }
 
         // Reset form function
         function resetForm() {
